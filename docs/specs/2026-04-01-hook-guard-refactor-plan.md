@@ -807,7 +807,7 @@ Replace the entire file with:
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # This file is part of Claude Code Workflows.
@@ -926,7 +926,7 @@ Replace the entire file. This is the largest task — the new version uses allow
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # This file is part of Claude Code Workflows.

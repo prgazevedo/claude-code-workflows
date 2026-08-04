@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # State machine: phase ordinals, get_phase edge cases, atomic writes,

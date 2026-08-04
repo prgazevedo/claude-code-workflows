@@ -268,7 +268,7 @@ Create `plugin/scripts/user-phase-token.sh`:
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # UserPromptSubmit hook: generates one-time tokens for phase and autonomy commands.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Bash-guard hook: allowlist/denylist per phase, write-op detection,

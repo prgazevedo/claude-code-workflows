@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Untrusted-content tagging (#50): WebFetch/WebSearch results get a

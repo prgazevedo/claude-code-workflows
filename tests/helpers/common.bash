@@ -1,4 +1,4 @@
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Shared bats helpers: temp project fixture, state file builders, hook

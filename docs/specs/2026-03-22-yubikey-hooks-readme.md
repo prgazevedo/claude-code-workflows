@@ -312,7 +312,7 @@ Replace the contents of `tools/yubikey-setup/git-yubikey` with:
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # This file is part of Claude Code Workflows.

@@ -94,7 +94,7 @@ Create `.claude/hooks/user-set-phase.sh` (adjust path if hooks are symlinks to p
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # USER PHASE TRANSITION — called only from !backtick in command files.

@@ -43,7 +43,7 @@ The start script accepts a provider argument (`claude` or `codex`), starts `ccpr
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Start CCProxy and configure ANTHROPIC_BASE_URL for the current shell.
@@ -153,7 +153,7 @@ warn "These vars are only active in this shell. New terminals need: source ccpro
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Stop CCProxy and clear active provider state.
@@ -285,7 +285,7 @@ Follows the same `yubikey-setup/install.sh` pattern: works from local clone or v
 
 ```bash
 #!/bin/bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Install CCProxy — multi-provider AI proxy for Claude Code

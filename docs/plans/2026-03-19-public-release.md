@@ -187,7 +187,7 @@ Add full GPL v3 license text at repository root.
 Add GPL v3 notice to all source files (shell scripts, templates). Standard short form:
 
 ```
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # This file is part of Claude Code Workflows.

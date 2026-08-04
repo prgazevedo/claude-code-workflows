@@ -622,7 +622,7 @@ git commit -m "feat: install/uninstall handle define.md command"
 Download or create the standard GPL v3 license text at the repo root. Use the full text from https://www.gnu.org/licenses/gpl-3.0.txt with the copyright notice:
 
 ```
-Copyright (C) 2026 azevedo-home-lab
+Copyright (C) 2026 Pedro Azevedo
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -653,7 +653,7 @@ The header to add after the shebang line (for `.sh` files) or at the top (for `.
 
 For shell scripts (after `#!/bin/bash`):
 ```bash
-# Copyright (C) 2026 azevedo-home-lab
+# Copyright (C) 2026 Pedro Azevedo
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # This file is part of Claude Code Workflows.
@@ -662,7 +662,7 @@ For shell scripts (after `#!/bin/bash`):
 
 For markdown templates (at the top, as HTML comment):
 ```markdown
-<!-- Copyright (C) 2026 azevedo-home-lab | SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright (C) 2026 Pedro Azevedo | SPDX-License-Identifier: GPL-3.0-only -->
 ```
 
 - [ ] **Step 1: List all files that need headers**
