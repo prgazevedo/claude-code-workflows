@@ -1,0 +1,85 @@
+#!/bin/bash
+# Copyright (C) 2026 azevedo-home-lab
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# This file is part of Claude Code Workflows.
+# See LICENSE for details.
+
+# AGENT PHASE TRANSITION — called only via Bash tool by Claude in auto autonomy mode.
+# Enforces forward-only transitions and milestone gate checks.
+# User transitions use user-set-phase.sh (!backtick only) — NOT this function.
+# There is no bypass: no user-override path here. Agent path only.
+
+[ -n "${_WFM_AGENT_SET_PHASE_LOADED:-}" ] && return 0
+_WFM_AGENT_SET_PHASE_LOADED=1
+
+SCRIPT_DIR="${SCRIPT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+source "$SCRIPT_DIR/infrastructure/gate-checks.sh"
+
+agent_set_phase() {
+    local new_phase="$1"
+
+    # Validate phase name.
+    # Agents cannot set phase to 'off' — only the user can end a cycle.
+    case "$new_phase" in
+        define|discuss|implement|review|complete) ;;
+        off) echo "BLOCKED: Agents cannot set phase to 'off'. Only the user can end a workflow cycle." >&2; return 1 ;;
+        *) echo "ERROR: Invalid phase: $new_phase (valid: define, discuss, implement, review, complete)" >&2; return 1 ;;
+    esac
+
+    # Authorization: forward-only auto-transition only.
+    if [ ! -f "$STATE_FILE" ]; then
+        echo "BLOCKED: No workflow state. The user must start a phase with a slash command first." >&2
+        return 1
+    fi
+
+    local current_autonomy
+    current_autonomy=$(get_autonomy_level)
+    if [ "$current_autonomy" != "auto" ]; then
+        echo "BLOCKED: Phase transition to '$new_phase' requires user authorization." >&2
+        echo "  Current autonomy: $current_autonomy" >&2
+        echo "  Agent transitions are only allowed in 'auto' autonomy mode." >&2
+        echo "" >&2
+        echo "  Agent instructions:" >&2
+        echo "    - Do NOT retry agent_set_phase — it will keep failing." >&2
+        echo "    - Present your completed work to the user." >&2
+        echo "    - Tell the user to run /$new_phase to proceed." >&2
+        return 1
+    fi
+
+    local current_ordinal new_ordinal
+    current_ordinal=$(_phase_ordinal "$(get_phase)")
+    new_ordinal=$(_phase_ordinal "$new_phase")
+    if [ "$new_ordinal" -le "$current_ordinal" ]; then
+        echo "BLOCKED: Agent may only advance the phase (forward-only)." >&2
+        echo "  Current: $(get_phase) (ordinal $current_ordinal)" >&2
+        echo "  Requested: $new_phase (ordinal $new_ordinal)" >&2
+        echo "  To go back or reset: the user must run the phase command directly." >&2
+        return 1
+    fi
+
+    # Hard gate checks: milestones must be complete before advancing.
+    local current
+    current=$(get_phase)
+    if ! _check_phase_gates "$current" "$new_phase"; then
+        return 1
+    fi
+
+    # Honest degradation (#46): when the tests_passing milestone was not
+    # required because no test suite exists, record the labeled verdict.
+    # A silent skip is indistinguishable from a pass in the state file.
+    if [ "$current" = "implement" ] && [ "$(_detect_test_suite)" = "false" ]; then
+        _update_state '.implement.tests_passing = "NO-TEST-SUITE"'
+    fi
+
+    # In-place state update — only change what the transition requires.
+    # Everything else (debug, autonomy, issue_mappings, etc.)
+    # survives automatically.
+    _update_state \
+        '.phase = $p | .message_shown = false | .active_skill = "" | .coaching = {tool_calls_since_agent: 0, layer2_fired: []}' \
+        --arg p "$new_phase" \
+        || { echo "ERROR: Failed to write state." >&2; return 1; }
+
+    echo "Phase advanced to ${new_phase}. Re-evaluate."
+
+}

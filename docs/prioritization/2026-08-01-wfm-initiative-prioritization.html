@@ -1,0 +1,837 @@
+<!--
+  WFM Initiative Prioritization board — source of the published Claude Artifact.
+
+  Published artifact (private to the owner unless shared from the page's share menu):
+    https://claude.ai/code/artifact/b2a70bab-c850-43ad-8e04-f49c52cfcaa1
+
+  Covers GitHub issues #44–#57: the agentic-sdlc comparative-analysis imports
+  (#44–#52), a live workflow-state bug captured mid-exercise (#53), the full WFM
+  profiling findings (#54–#56), and the phase evidence trace design (#57).
+
+  Purpose — a stepwise prioritization exercise:
+    Step 0  backlog reference table (all initiatives, linked to GitHub)
+    Step 1  Value x Complexity matrix, drag to sort, dependency arrows redraw live
+    Step 2  commit initiatives to waves; dependency violations warn inline
+    Step 3  export the arrangement as markdown to feed back into a session
+
+  Editing: this file IS the artifact source. Republish with the Artifact tool
+  using this path to update the URL above; publishing a different path mints a
+  new URL. Positions, wave assignments and notes are stored per-browser in
+  localStorage (key `wfm-prioritization-v2`) and are NOT part of this file —
+  the committed state is the starting arrangement, not anyone's saved session.
+
+  Provenance: authored 2026-07-29, relocated from the session scratchpad and
+  committed 2026-08-01 so the source survives the session that produced it.
+-->
+<title>WFM Initiative Prioritization</title>
+<style>
+  :root {
+    --bg: #f6f8f7;
+    --surface: #ffffff;
+    --surface-2: #eef2f0;
+    --ink: #1d2422;
+    --muted: #5d6a66;
+    --line: #d8e0dd;
+    --accent: #12756a;
+    --accent-ink: #ffffff;
+    --accent-soft: #e0efec;
+    --warn: #96660a;
+    --warn-soft: #f7ecd4;
+    --danger: #b3453a;
+    --danger-soft: #f6e3e0;
+    --info-soft: #e4ebf5;
+    --info: #3d5a80;
+    --shadow: 0 1px 3px rgba(29, 36, 34, 0.08);
+    --sans: "Avenir Next", "Seravek", "Segoe UI", system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161b1a;
+      --surface: #1f2624;
+      --surface-2: #262f2c;
+      --ink: #e7ecea;
+      --muted: #93a19c;
+      --line: #35403c;
+      --accent: #4cc8b6;
+      --accent-ink: #0e1f1c;
+      --accent-soft: #1d3733;
+      --warn: #e3b341;
+      --warn-soft: #3a3021;
+      --danger: #e08477;
+      --danger-soft: #402724;
+      --info-soft: #253243;
+      --info: #93b4d8;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161b1a;
+    --surface: #1f2624;
+    --surface-2: #262f2c;
+    --ink: #e7ecea;
+    --muted: #93a19c;
+    --line: #35403c;
+    --accent: #4cc8b6;
+    --accent-ink: #0e1f1c;
+    --accent-soft: #1d3733;
+    --warn: #e3b341;
+    --warn-soft: #3a3021;
+    --danger: #e08477;
+    --danger-soft: #402724;
+    --info-soft: #253243;
+    --info: #93b4d8;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f8f7;
+    --surface: #ffffff;
+    --surface-2: #eef2f0;
+    --ink: #1d2422;
+    --muted: #5d6a66;
+    --line: #d8e0dd;
+    --accent: #12756a;
+    --accent-ink: #ffffff;
+    --accent-soft: #e0efec;
+    --warn: #96660a;
+    --warn-soft: #f7ecd4;
+    --danger: #b3453a;
+    --danger-soft: #f6e3e0;
+    --info-soft: #e4ebf5;
+    --info: #3d5a80;
+    --shadow: 0 1px 3px rgba(29, 36, 34, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 64px; display: flex; flex-direction: column; gap: 20px; }
+
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  header.top h1 { margin: 2px 0 4px; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+  header.top p.sub { margin: 0; color: var(--muted); max-width: 68ch; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    font-family: var(--sans); font-size: 13.5px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 6px;
+    background: var(--surface); color: var(--ink);
+    padding: 7px 14px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .tensions { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .tension {
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: var(--muted);
+  }
+  .tension b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px; font-size: 12.5px; }
+
+  .stephead { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
+  .stephead .stepnum { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+  .stephead h2 { margin: 0; font-size: 17px; font-weight: 600; }
+  .stephead .hint { font-size: 13px; color: var(--muted); }
+
+  /* ---------- Step 0: backlog table ---------- */
+  .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  .issue-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+  .issue-table th {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); text-align: left; padding: 9px 12px; border-bottom: 1.5px solid var(--line);
+    white-space: nowrap;
+  }
+  .issue-table td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .issue-table tr:last-child td { border-bottom: none; }
+  .issue-table td.num { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+  .issue-table td.num a { color: var(--accent); text-decoration: none; }
+  .issue-table td.num a:hover { text-decoration: underline; }
+  .issue-table td.ttl { font-weight: 600; min-width: 180px; }
+  .issue-table td.dsc { color: var(--muted); line-height: 1.45; min-width: 280px; }
+  .issue-table td.sz { font-family: var(--mono); white-space: nowrap; }
+
+  /* ---------- Step 1: matrix ---------- */
+  .matrix-outer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .matrix {
+    position: relative; height: 560px; border-radius: 8px;
+    background:
+      linear-gradient(var(--line), var(--line)) center/100% 1.5px no-repeat,
+      linear-gradient(90deg, var(--line), var(--line)) center/1.5px 100% no-repeat,
+      var(--bg);
+    touch-action: none; overflow: hidden;
+  }
+  .axis-label { position: absolute; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
+  .axis-label.val-hi { top: 8px; left: 50%; transform: translateX(-50%); }
+  .axis-label.val-lo { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .axis-label.cx-lo { left: 8px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; }
+  .axis-label.cx-hi { right: 8px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; }
+  .quad-label { position: absolute; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; pointer-events: none; opacity: 0.75; }
+  .quad-label small { display: block; font-weight: 400; color: var(--muted); }
+  .quad-label.q-qw { top: 26px; left: 16px; color: var(--accent); }
+  .quad-label.q-sb { top: 26px; right: 16px; text-align: right; color: var(--info); }
+  .quad-label.q-fi { bottom: 26px; left: 16px; color: var(--warn); }
+  .quad-label.q-mp { bottom: 26px; right: 16px; text-align: right; color: var(--danger); }
+
+  .mchip {
+    position: absolute; transform: translate(-50%, -50%);
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 4px 11px; box-shadow: var(--shadow);
+    font-size: 12.5px; white-space: nowrap; cursor: grab; user-select: none;
+  }
+  .mchip:active { cursor: grabbing; }
+  .mchip.dragging { z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+  .mchip .n { font-family: var(--mono); font-weight: 700; color: var(--accent); }
+  .mchip .c { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .mchip.k-security { border-color: var(--danger); }
+  .mchip.k-bug { border-color: var(--danger); border-style: dashed; }
+  .mchip.k-safety { border-color: var(--accent); }
+  .mchip.k-architecture { border-color: var(--warn); }
+  .mchip.k-rigor { border-color: var(--info); }
+  .mchip.k-review, .mchip.k-economics { border-color: var(--line); }
+  .matrix-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .matrix-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .lg { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  /* ---------- Step 2: waves ---------- */
+  .board-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .board { display: grid; grid-template-columns: repeat(4, minmax(255px, 1fr)); gap: 14px; min-width: 1060px; }
+  .col { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 220px; }
+  .col.dragover { border-color: var(--accent); background: var(--accent-soft); }
+  .col-head { display: flex; align-items: baseline; justify-content: space-between; padding: 2px 4px 0; }
+  .col-head .name { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 700; }
+  .col-head .count { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .col-hint { font-size: 12px; color: var(--muted); padding: 0 4px; margin-top: -6px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: var(--shadow); padding: 10px 12px; cursor: grab;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .card:active { cursor: grabbing; }
+  .card.dragging { opacity: 0.5; }
+  .card-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .num { font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--accent); }
+  .chip {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+    border-radius: 999px; padding: 1.5px 8px; border: 1px solid var(--line); color: var(--muted);
+  }
+  .chip.kind-security { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+  .chip.kind-bug { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+  .chip.kind-safety { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .chip.kind-rigor, .chip.kind-review, .chip.kind-architecture, .chip.kind-economics { background: var(--surface-2); }
+  .card h3 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .card h3 a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  .card h3 a:hover { color: var(--accent); border-bottom-style: solid; }
+  .card .desc { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+  .deps { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  #dep-arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .warnbox { display: flex; flex-direction: column; gap: 4px; }
+  .warn-item { font-size: 12px; border-radius: 6px; padding: 4px 8px; background: var(--warn-soft); color: var(--warn); }
+  .warn-item.info { background: var(--info-soft); color: var(--info); }
+  details.more { font-size: 13px; color: var(--muted); }
+  details.more summary { cursor: pointer; font-size: 12.5px; color: var(--accent); font-weight: 600; list-style: none; }
+  details.more summary::before { content: "▸ "; }
+  details.more[open] summary::before { content: "▾ "; }
+  details.more p { margin: 6px 0 0; }
+  details.more p b { color: var(--ink); }
+  .card textarea, .rationale textarea {
+    width: 100%; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 13px;
+    padding: 6px 8px; resize: vertical; min-height: 34px;
+  }
+  .card textarea:focus-visible, .rationale textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .movebar { display: flex; gap: 4px; align-items: center; }
+  .movebar span { font-size: 11px; color: var(--muted); margin-right: 2px; }
+  .movebar button { padding: 2px 9px; font-size: 11.5px; font-family: var(--mono); border-radius: 5px; }
+  .movebar button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .rationale { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .rationale label { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+
+  .export { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .export-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .export pre {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; font-family: var(--mono); font-size: 12px; line-height: 1.55;
+    overflow-x: auto; margin: 0; white-space: pre-wrap;
+  }
+  .status { font-size: 12.5px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .board { grid-template-columns: 1fr; min-width: 0; }
+    .matrix { height: 480px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card, .col, button { transition: border-color 120ms ease, background 120ms ease, opacity 120ms ease; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">ClaudeWorkflows · issues #44–#57 · agentic-sdlc imports + profiling findings</div>
+      <h1>WFM Initiative Prioritization</h1>
+      <p class="sub">Step 1: review Claude's pre-placement on the Value × Complexity matrix and drag chips until you agree. Step 2: commit cards to waves below. Step 3: fix any dependency warnings. Step 4: export and paste back into the Claude Code session.</p>
+    </div>
+    <div class="toolbar">
+      <button id="btn-claude" class="primary" type="button">Reset to Claude's plan</button>
+      <button id="btn-reset" type="button">Clear board</button>
+    </div>
+  </header>
+
+  <section class="tensions" aria-label="Tensions to prioritize against">
+    <div class="tension"><b>1 · Priority ≠ build order</b>#48's dispatch-contract change touches the same agent prompts #46/#47/#49 rewrite — order decides whether you touch them twice.</div>
+    <div class="tension"><b>2 · Security placement</b>#50's hook tagging is cheap, independent, and guards auto mode's riskiest combination — yet was filed 7-of-7.</div>
+    <div class="tension"><b>3 · Auto is the goal</b>You run interactive today but auto is the destination — #45, #50, #51, #53 are rails to build <i>before</i> trusting auto.</div>
+    <div class="tension"><b>4 · Complexity budget</b>14 initiatives add fixtures, ledgers, registries to 34 agents + 14 scripts — and the platform under them (#54–#56) is untested. Pruning deserves first-class status.</div>
+  </section>
+
+  <div class="stephead">
+    <span class="stepnum">Step 0</span>
+    <h2>Backlog reference</h2>
+    <span class="hint">All 14 initiatives by issue number — keep it handy while sorting below. Issue numbers link to GitHub.</span>
+  </div>
+  <section class="table-wrap">
+    <table class="issue-table">
+      <thead>
+        <tr><th>#</th><th>Title</th><th>Type</th><th>Description</th><th>Size</th></tr>
+      </thead>
+      <tbody id="issue-tbody"></tbody>
+    </table>
+  </section>
+
+  <div class="stephead">
+    <span class="stepnum">Step 1</span>
+    <h2>Value × Complexity — review &amp; drag</h2>
+    <span class="hint">Chips are pre-placed at Claude's assessment. Up = value toward trustworthy auto mode · right = complexity/cost.</span>
+  </div>
+  <section class="matrix-outer">
+    <div class="matrix" id="matrix">
+      <svg id="dep-arrows" aria-hidden="true"></svg>
+      <span class="axis-label val-hi">high value</span>
+      <span class="axis-label val-lo">low value</span>
+      <span class="axis-label cx-lo">low complexity</span>
+      <span class="axis-label cx-hi">high complexity</span>
+      <span class="quad-label q-qw">QUICK WINS<small>do first</small></span>
+      <span class="quad-label q-sb">STRATEGIC BETS<small>plan deliberately</small></span>
+      <span class="quad-label q-fi">FILL-INS<small>spare capacity</small></span>
+      <span class="quad-label q-mp">MONEY PITS<small>park them</small></span>
+    </div>
+    <div class="matrix-legend">
+      <span><span class="lg" style="background:var(--accent)"></span> safety rail</span>
+      <span><span class="lg" style="background:var(--info)"></span> rigor</span>
+      <span><span class="lg" style="background:var(--danger)"></span> security / bug</span>
+      <span><span class="lg" style="background:var(--warn)"></span> architecture</span>
+      <span><span class="lg" style="background:var(--line)"></span> review / feature·capacity</span>
+      <span style="margin-left:auto">arrows = dependencies: <b>solid</b> builds-on / gated by · <b>dashed</b> eval fixtures from #44</span>
+    </div>
+  </section>
+
+  <div class="stephead">
+    <span class="stepnum">Step 2</span>
+    <h2>Commit to waves</h2>
+    <span class="hint">Drag cards between columns (or use the 1/2/3/– buttons). Top of a column = first. Warnings recompute live.</span>
+  </div>
+  <div class="board-scroll">
+    <div class="board" id="board"></div>
+  </div>
+
+  <section class="rationale">
+    <label for="rationale-text">Overall rationale · why this order</label>
+    <textarea id="rationale-text" rows="3" placeholder="Notes on the sequencing logic, constraints, what you rejected…"></textarea>
+  </section>
+
+  <section class="export">
+    <div class="export-actions">
+      <button id="btn-preview" type="button">Generate export</button>
+      <button id="btn-copy" type="button">Copy markdown</button>
+      <button id="btn-download" type="button" hidden>Download .md</button>
+      <span class="status" id="status"></span>
+    </div>
+    <pre id="export-pre" hidden></pre>
+  </section>
+</div>
+
+<script>
+  "use strict";
+
+  const GH = "https://github.com/prgazevedo/claude-code-workflows/issues/";
+
+  // pos = Claude's pre-placement on the matrix: cx = complexity (0 left → 1 right), cv = value (0 bottom → 1 top)
+  const INITIATIVES = [
+    { id: 44, title: "Eval harness for agent prompts (RED/GREEN + LLM judge)", short: "eval harness", kind: "rigor", cost: "L", payoff: "both",
+      pos: { cx: 0.80, cv: 0.85 },
+      deps: [],
+      desc: "Port agentic-sdlc's eval harness: RED/GREEN pressure-test fixtures per load-bearing rule, hermetic candidate runs, an LLM judge, and the Iron Law — no agent-prompt edit without watching the failure first.",
+      why: "34 agent prompts and the coaching layer are untested; no way to know if an edit weakened an agent. Profiling addendum: the prompts are 24–29 lines each — expect RED to indict the prompts themselves.",
+      take: "Seed it in Wave 1 (skeleton + RED baselines for the top 5 agents); grow coverage in Wave 2. It gates evidence-based decisions in six other initiatives." },
+    { id: 45, title: "Bounded fix loops: failure signatures + attempt log", short: "loop caps", kind: "safety", cost: "M", payoff: "auto",
+      pos: { cx: 0.55, cv: 0.90 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Auto-fix loops currently retry forever, and each retry has amnesia. Fix: stop after 3 identical failures or 2 no-progress review rounds and hand back to the human; keep an append-only attempt log every new fixer must read, so retries build on failures instead of repeating them.",
+      why: "Auto mode has no cap on fix iterations; re-dispatched fixers have no memory of failed attempts.",
+      take: "A hard prerequisite for trusting auto mode. Wave 2, before auto usage ramps." },
+    { id: 46, title: "Honest-degradation verdicts + evidence tables", short: "honest verdicts", kind: "rigor", cost: "S", payoff: "both",
+      pos: { cx: 0.20, cv: 0.70 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Replace silent gate skips with labeled verdicts (NO-TEST-SUITE, BLOCKED-BY-ENV…), evidence tables (claim → requires → not sufficient), and an untested-behaviors ledger — with a central verdict registry.",
+      why: "tests_passing silently skips when no suite is detected — a skipped gate is indistinguishable from a passed one.",
+      take: "Cheap prompt edits that improve interactive sessions today. Wave 1. The NO-TEST-SUITE verdict alone is an afternoon." },
+    { id: 47, title: "Reviewer-independence clause + re-review protocol", short: "reviewer indep.", kind: "review", cost: "S", payoff: "both",
+      pos: { cx: 0.16, cv: 0.60 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Reviewers drop biased dispatch framing ('don't flag X', 'at most Minor'); re-reviews open by adjudicating every prior blocking finding; blockers must be demonstrable, not taste.",
+      why: "The session that wrote the code frames the reviewers' dispatch prompts; nothing stops self-serving framing.",
+      take: "Cheap prompt paragraph, closes a bias at the source. Wave 1." },
+    { id: 48, title: "Artifact handoff + context isolation (auto ≈ pipeline)", short: "artifact handoff", kind: "architecture", cost: "L", payoff: "auto",
+      pos: { cx: 0.92, cv: 0.72 },
+      deps: [],
+      desc: "One fresh subagent per stage with disk artifacts as the only handoff; the orchestrating session holds status lines, not report bodies; artifacts double as the crash/compaction resume ledger.",
+      why: "Full cycles accumulate every agent report in one context window; #25 documents the dilution.",
+      take: "Deepest change; deserves its own DEFINE/DISCUSS cycle. Decide the dispatch-report contract EARLY even if the build lands late — it shapes #46/#47/#49." },
+    { id: 49, title: "Blast-radius check + behavioral-confirmation gate", short: "blast radius", kind: "review", cost: "M", payoff: "both",
+      pos: { cx: 0.50, cv: 0.55 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Two review grafts: a REQUIRED blast-radius section (call sites outside the diff checked against changed contracts) and behavioral confirmation (drive the runtime surface through AC paths, incl. failure paths).",
+      why: "Reviewers stop at the diff boundary; green tests get mistaken for done acceptance criteria.",
+      take: "Real review-quality wins, medium effort. Wave 2 — after the #48 contract direction is at least decided." },
+    { id: 50, title: "Injection posture: untrusted content as data-not-instructions", short: "injection posture", kind: "security", cost: "M", payoff: "auto",
+      pos: { cx: 0.38, cv: 0.95 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Mechanically tag GitHub issues, web research, and claude-mem text as data-not-instructions via a PostToolUse hook; add provenance rules, bounded ingest, and a review-phase injection check.",
+      why: "Issues, web research, and claude-mem text flow into plans unmarked; auto mode adds commit rights to that mix.",
+      take: "Under-prioritized at 7-of-7. The PostToolUse hook-tagging sub-issue is cheap, mechanical, independent — Wave 1. The full threat model can follow." },
+    { id: 51, title: "Re-plan edge: gated REVIEW→DISCUSS/DEFINE recovery", short: "re-plan edge", kind: "safety", cost: "M", payoff: "auto",
+      pos: { cx: 0.60, cv: 0.68 },
+      deps: [{ on: 45, kind: "extends" }, { on: 44, kind: "evals" }],
+      desc: "Add a gated REVIEW→DISCUSS/DEFINE recovery transition for when the plan (not the code) is wrong — carrying the attempt log and findings as evidence; never auto-fires; one re-plan per cycle.",
+      why: "Bounded loops stop; they don't recover. A wrong plan can only be fixed by re-planning, not by fix attempt #4.",
+      take: "Builds on #45's attempt log — sequence it after. Wave 2." },
+    { id: 52, title: "Evidence-gated model routing for agent dispatch", short: "model routing", kind: "economics", cost: "M", payoff: "both",
+      pos: { cx: 0.55, cv: 0.78 },
+      deps: [{ on: 44, kind: "gated" }],
+      desc: "Route mechanical agents to cheaper models via per-agent model frontmatter; every downgrade gated on #44 GREEN fixtures passing on that model; a static routing table plus cost visibility — not a scheduler.",
+      why: "~34 dispatches per cycle inherit the session's frontier model. On a subscription, cost = capacity: burned weekly limits stop the workflow entirely. Subagents run ~7x tokens; three-tier routing saves ~51% vs uniform frontier.",
+      take: "Value conceded HIGH (owner override, evidence-backed): routing is viability, not just economics. Hard dependency stands — downgrades need #44 GREEN fixtures on the cheap model; ungated routing risks silently weakened reviewers. Strictly after #44; pilot the 4 narrow-contract agents early." },
+    { id: 53, title: "Stale state + coach decline protocol (live RED evidence)", short: "stale state", kind: "bug", cost: "M", payoff: "both",
+      pos: { cx: 0.42, cv: 0.80 },
+      deps: [{ on: 44, kind: "evals" }],
+      desc: "Session-stamped workflow state with staleness detection, a coach decline/ack protocol with re-fire caps, per-session re-arm for auto mode, and state-layer (not just wrapper) guard enforcement.",
+      why: "Live capture 2026-07-29: implement/auto state from May 31 enforced by the coach 21 times; agent declined with no record; user found out only by asking. Plus: guards enforce at the wrapper, not the state file.",
+      take: "The re-fire cap and autonomy-surfacing parts are cheap Wave 1 candidates; the full decline protocol pairs with #44." },
+    { id: 54, title: "Shell test suite + CI for the mechanical layer", short: "shell tests+CI", kind: "rigor", cost: "M", payoff: "both",
+      pos: { cx: 0.35, cv: 0.75 },
+      deps: [],
+      desc: "Add bats-core tests, shellcheck, and a required GitHub Actions workflow covering the state machine, write/bash guards, and coaching plumbing — the shell-layer twin of #44's Iron Law.",
+      why: "3,600 lines of guard/gate/state bash with zero tests and no CI; the bug history (#41, #43) is all shell defects.",
+      take: "The shell-layer twin of #44 — bats-core + shellcheck + GitHub Actions. No dependencies, protects everything else: Wave 1." },
+    { id: 55, title: "Stale docs + split-brain repo trees", short: "docs/hygiene", kind: "bug", cost: "S", payoff: "both",
+      pos: { cx: 0.10, cv: 0.50 },
+      deps: [],
+      desc: "Fix the shipped architecture doc (names hook scripts that no longer exist), pick one canonical architecture doc, and disposition the divergent cl-plugin/ tree plus root clutter (archive/, tmp/, .serena/).",
+      why: "Shipped architecture doc names hook scripts that no longer exist; cl-plugin/ is a divergent old tree inviting wrong-tree edits.",
+      take: "Cheap and protective — Wave 1. Do it before #47's prompt edits so nobody edits the wrong tree." },
+    { id: 56, title: "Single-source version + hardened release path", short: "release path", kind: "architecture", cost: "M", payoff: "both",
+      pos: { cx: 0.50, cv: 0.44 },
+      deps: [{ on: 54, kind: "extends" }],
+      desc: "Single-source the plugin version with generated/verified manifests (the triple-bump desync caused #41), make the 3-file bump atomic, and shrink setup.sh's every-SessionStart surface.",
+      why: "Triple-manifest version bump guarded only by a CLAUDE.md warning (caused #41); setup.sh self-update + global command copying on every SessionStart.",
+      take: "Mechanize the sync, shrink the SessionStart surface. Wave 2 — its checks run in #54's CI." },
+    { id: 57, title: "Phase evidence trace: issue comments + secret gists", short: "evidence trace", kind: "architecture", cost: "M", payoff: "both",
+      pos: { cx: 0.42, cv: 0.66 },
+      deps: [{ on: 46, kind: "extends" }, { on: 50, kind: "extends" }],
+      desc: "One issue comment per phase carrying verdicts, evidence and pointers; full artifacts in linked secret gists; nothing added to the repo. Verified limits: 100MB/file, 5000 API req/hr, secret-but-unlisted (so artifacts must be safe-if-leaked).",
+      why: "Agent evidence currently has no consistent home — reviewer reports evaporate inline, verdicts vanish on phase transition, and nothing points between plans, handovers and issues. After a cycle there's no artifact answering 'what was checked and can I trust it?'",
+      take: "Owner-designed (2026-07-29): rejected a repo manifest — gitignored it vanishes, committed it churns the repo. Consumes #46's verdict registry and #50's trust marker; makes #48's working files genuinely ephemeral. Wave 2 alongside those." }
+  ];
+
+  const CLAUDE_PLAN = { w1: [50, 46, 47, 44, 54, 55], w2: [45, 51, 49, 56, 57], w3: [48, 52] };
+  const WAVES = ["w1", "w2", "w3", "un"];
+  const WAVE_LABEL = { w1: "Wave 1", w2: "Wave 2", w3: "Wave 3", un: "Unassigned" };
+  const WAVE_HINT = {
+    w1: "Cheap rails + seeds — land these first",
+    w2: "Auto-mode prerequisites",
+    w3: "Architectural / gated work",
+    un: "Not yet placed / parked"
+  };
+  const KIND_LABEL = { rigor: "rigor", safety: "safety rail", review: "review quality", architecture: "architecture", security: "security", economics: "feature · capacity", bug: "bug" };
+  const STORAGE_KEY = "wfm-prioritization-v2";
+
+  function defaultPos() {
+    const p = {};
+    INITIATIVES.forEach(i => { p[i.id] = { cx: i.pos.cx, cv: i.pos.cv }; });
+    return p;
+  }
+  function freshState() {
+    return { waves: { w1: [], w2: [], w3: [], un: INITIATIVES.map(i => i.id) }, notes: {}, rationale: "", pos: defaultPos() };
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || !s.waves) return null;
+      const seen = new Set();
+      WAVES.forEach(w => {
+        s.waves[w] = (s.waves[w] || []).filter(id => {
+          const ok = INITIATIVES.some(i => i.id === id) && !seen.has(id);
+          if (ok) seen.add(id);
+          return ok;
+        });
+      });
+      INITIATIVES.forEach(i => { if (!seen.has(i.id)) s.waves.un.push(i.id); });
+      s.notes = s.notes || {};
+      s.rationale = s.rationale || "";
+      s.pos = s.pos || {};
+      INITIATIVES.forEach(i => { if (!s.pos[i.id]) s.pos[i.id] = { cx: i.pos.cx, cv: i.pos.cv }; });
+      return s;
+    } catch { return null; }
+  }
+  let state = load() || freshState();
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+
+  function waveOf(id) {
+    for (const w of WAVES) if (state.waves[w].includes(id)) return w;
+    return "un";
+  }
+  function waveIndex(id) { return WAVES.indexOf(waveOf(id)); }
+  function quadrantOf(id) {
+    const p = state.pos[id];
+    const hiV = p.cv >= 0.5, hiC = p.cx >= 0.5;
+    if (hiV && !hiC) return "Quick Win";
+    if (hiV && hiC) return "Strategic Bet";
+    if (!hiV && !hiC) return "Fill-in";
+    return "Money Pit";
+  }
+
+  function warningsFor(item) {
+    const out = [];
+    const wi = waveIndex(item.id);
+    for (const dep of item.deps) {
+      const di = waveIndex(dep.on);
+      if (dep.kind === "evals" && wi < di) {
+        out.push({ level: "info", text: "Eval fixtures for this will lag until #44 lands (#44 is in a later wave)." });
+      }
+      if (dep.kind === "extends" && wi < di) {
+        out.push({ level: "warn", text: "Builds on #" + dep.on + " — placed before it." });
+      }
+      if (dep.kind === "gated" && wi <= di && wi < 3) {
+        out.push({ level: "warn", text: "Model downgrades should be gated on #44 GREEN baselines — place this strictly after #44." });
+      }
+    }
+    if (item.id === 48 && wi < 3) {
+      const promptWaves = [46, 47, 49].map(waveIndex).filter(i => i < 3);
+      if (promptWaves.length && wi > Math.min.apply(null, promptWaves)) {
+        out.push({ level: "info", text: "Lands after the prompt rewrites (#46/#47/#49) — decide its dispatch-report contract early or those prompts get touched twice." });
+      }
+    }
+    return out;
+  }
+
+  /* ---------- Matrix ---------- */
+  const matrixEl = document.getElementById("matrix");
+  const chipEls = {};
+  const arrowSvg = document.getElementById("dep-arrows");
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const ARROW_STYLE = {
+    evals:   { color: "#95a29d", dash: "5 5", width: 1.3, op: 0.55 },
+    extends: { color: "#2fa38f", dash: "",    width: 1.8, op: 0.9 },
+    gated:   { color: "#8a94a0", dash: "",    width: 1.8, op: 0.9 }
+  };
+  const DEP_EDGES = [];
+  INITIATIVES.forEach(i => i.deps.forEach(d => DEP_EDGES.push({ from: d.on, to: i.id, kind: d.kind })));
+
+  function updateArrows() {
+    const w = matrixEl.clientWidth, h = matrixEl.clientHeight;
+    if (!w || !h) return;
+    arrowSvg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    while (arrowSvg.firstChild) arrowSvg.removeChild(arrowSvg.firstChild);
+    const defs = document.createElementNS(SVG_NS, "defs");
+    for (const kind in ARROW_STYLE) {
+      const m = document.createElementNS(SVG_NS, "marker");
+      m.setAttribute("id", "ah-" + kind);
+      m.setAttribute("viewBox", "0 0 10 10");
+      m.setAttribute("refX", "8"); m.setAttribute("refY", "5");
+      m.setAttribute("markerWidth", "7"); m.setAttribute("markerHeight", "7");
+      m.setAttribute("orient", "auto-start-reverse");
+      const p = document.createElementNS(SVG_NS, "path");
+      p.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+      p.setAttribute("fill", ARROW_STYLE[kind].color);
+      m.appendChild(p);
+      defs.appendChild(m);
+    }
+    arrowSvg.appendChild(defs);
+    for (const e of DEP_EDGES) {
+      const a = state.pos[e.from], b = state.pos[e.to];
+      if (!a || !b) continue;
+      const x1 = a.cx * w, y1 = (1 - a.cv) * h;
+      let x2 = b.cx * w, y2 = (1 - b.cv) * h;
+      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+      const pull = Math.min(52, len * 0.4); // stop short of the target chip
+      x2 -= (dx / len) * pull; y2 -= (dy / len) * pull;
+      const sx1 = x1 + (dx / len) * Math.min(40, len * 0.3), sy1 = y1 + (dy / len) * Math.min(40, len * 0.3);
+      const st = ARROW_STYLE[e.kind] || ARROW_STYLE.evals;
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", sx1); line.setAttribute("y1", sy1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+      line.setAttribute("stroke", st.color);
+      line.setAttribute("stroke-width", st.width);
+      line.setAttribute("stroke-opacity", st.op);
+      if (st.dash) line.setAttribute("stroke-dasharray", st.dash);
+      line.setAttribute("marker-end", "url(#ah-" + e.kind + ")");
+      arrowSvg.appendChild(line);
+    }
+  }
+  window.addEventListener("resize", updateArrows);
+
+  function chipPosition(el, id) {
+    const p = state.pos[id];
+    el.style.left = (p.cx * 100) + "%";
+    el.style.top = ((1 - p.cv) * 100) + "%";
+  }
+
+  function buildMatrix() {
+    for (const item of INITIATIVES) {
+      const el = document.createElement("div");
+      el.className = "mchip k-" + item.kind;
+      el.innerHTML = '<span class="n">#' + item.id + "</span> " + item.short + ' <span class="c">' + item.cost +
+        (item.deps.length ? " · after #" + item.deps.map(d => d.on).join(",#") : "") + "</span>";
+      el.title = item.title;
+      chipPosition(el, item.id);
+      el.addEventListener("pointerdown", e => startDrag(e, el, item.id));
+      matrixEl.appendChild(el);
+      chipEls[item.id] = el;
+    }
+    updateArrows();
+  }
+
+  function startDrag(e, el, id) {
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    el.classList.add("dragging");
+    const move = ev => {
+      const r = matrixEl.getBoundingClientRect();
+      const cx = Math.min(0.97, Math.max(0.03, (ev.clientX - r.left) / r.width));
+      const cv = Math.min(0.97, Math.max(0.03, 1 - (ev.clientY - r.top) / r.height));
+      state.pos[id] = { cx: cx, cv: cv };
+      chipPosition(el, id);
+      updateArrows();
+    };
+    const up = () => {
+      el.classList.remove("dragging");
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      save();
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  }
+
+  function refreshMatrix() {
+    for (const item of INITIATIVES) chipPosition(chipEls[item.id], item.id);
+    updateArrows();
+  }
+
+  /* ---------- Waves board ---------- */
+  const board = document.getElementById("board");
+
+  function render() {
+    board.innerHTML = "";
+    for (const w of WAVES) {
+      const col = document.createElement("div");
+      col.className = "col";
+      col.dataset.wave = w;
+      col.innerHTML =
+        '<div class="col-head"><span class="name">' + WAVE_LABEL[w] + '</span><span class="count">' + state.waves[w].length + "</span></div>" +
+        '<div class="col-hint">' + WAVE_HINT[w] + "</div>";
+      col.addEventListener("dragover", e => { e.preventDefault(); col.classList.add("dragover"); });
+      col.addEventListener("dragleave", () => col.classList.remove("dragover"));
+      col.addEventListener("drop", e => {
+        e.preventDefault();
+        col.classList.remove("dragover");
+        const id = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (id) moveTo(id, w);
+      });
+      for (const id of state.waves[w]) col.appendChild(renderCard(INITIATIVES.find(i => i.id === id)));
+      board.appendChild(col);
+    }
+    save();
+  }
+
+  function renderCard(item) {
+    const el = document.createElement("article");
+    el.className = "card";
+    el.draggable = true;
+    const w = waveOf(item.id);
+    const depsTxt = item.deps.length
+      ? "after: " + item.deps.map(d => "#" + d.on).join(", ")
+      : "no dependencies";
+    const warns = warningsFor(item);
+    el.innerHTML =
+      '<div class="card-top">' +
+        '<span class="num">#' + item.id + "</span>" +
+        '<span class="chip kind-' + item.kind + '">' + KIND_LABEL[item.kind] + "</span>" +
+        '<span class="chip">cost ' + item.cost + "</span>" +
+        '<span class="chip">pays off: ' + item.payoff + "</span>" +
+        '<span class="chip">' + quadrantOf(item.id) + "</span>" +
+      "</div>" +
+      '<h3><a href="' + GH + item.id + '" target="_blank" rel="noopener" draggable="false">' + item.title + "</a></h3>" +
+      '<p class="desc">' + item.desc + "</p>" +
+      '<div class="deps">' + depsTxt + "</div>" +
+      '<div class="warnbox">' + warns.map(x => '<div class="warn-item ' + (x.level === "info" ? "info" : "") + '">' + x.text + "</div>").join("") + "</div>" +
+      '<details class="more"><summary>Why · Claude’s take</summary>' +
+        "<p><b>Why:</b> " + item.why + "</p><p><b>Claude:</b> " + item.take + "</p></details>" +
+      '<div class="movebar"><span>Move:</span>' +
+        WAVES.map(x =>
+          '<button type="button" data-move="' + x + '" class="' + (x === w ? "active" : "") + '">' +
+          (x === "un" ? "–" : x.slice(1)) + "</button>"
+        ).join("") +
+      "</div>";
+
+    const note = document.createElement("textarea");
+    note.placeholder = "Note on this placement…";
+    note.value = state.notes[item.id] || "";
+    note.addEventListener("input", () => { state.notes[item.id] = note.value; save(); });
+    el.appendChild(note);
+
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", String(item.id));
+      el.classList.add("dragging");
+    });
+    el.addEventListener("dragend", () => el.classList.remove("dragging"));
+    el.querySelectorAll("[data-move]").forEach(btn =>
+      btn.addEventListener("click", () => moveTo(item.id, btn.dataset.move))
+    );
+    return el;
+  }
+
+  function moveTo(id, wave) {
+    for (const w of WAVES) state.waves[w] = state.waves[w].filter(x => x !== id);
+    state.waves[wave].push(id);
+    render();
+  }
+
+  document.getElementById("btn-claude").addEventListener("click", () => {
+    state.waves = { w1: CLAUDE_PLAN.w1.slice(), w2: CLAUDE_PLAN.w2.slice(), w3: CLAUDE_PLAN.w3.slice(), un: [] };
+    const placed = new Set([].concat(CLAUDE_PLAN.w1, CLAUDE_PLAN.w2, CLAUDE_PLAN.w3));
+    state.waves.un = INITIATIVES.map(i => i.id).filter(id => !placed.has(id));
+    state.pos = defaultPos();
+    refreshMatrix();
+    render();
+    setStatus("Claude's plan loaded — matrix positions and waves reset to Claude's assessment. #53 left unassigned for you to place. #44 in Wave 1 = seed (skeleton + RED for top 5 agents).");
+  });
+
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    state = freshState();
+    document.getElementById("rationale-text").value = "";
+    refreshMatrix();
+    render();
+    setStatus("Board cleared — all cards unassigned, matrix back to Claude's pre-placement.");
+  });
+
+  const rationale = document.getElementById("rationale-text");
+  rationale.value = state.rationale;
+  rationale.addEventListener("input", () => { state.rationale = rationale.value; save(); });
+
+  function buildMarkdown() {
+    const lines = [];
+    lines.push("# WFM Initiative Prioritization — " + new Date().toISOString().slice(0, 10));
+    lines.push("");
+    lines.push("Issues #44–#56. Board exported from the prioritization artifact (matrix + waves).");
+    lines.push("");
+    lines.push("## Step 1 — Value × Complexity placement");
+    for (const item of INITIATIVES) {
+      const p = state.pos[item.id];
+      lines.push("- **#" + item.id + "** " + item.short + " → " + quadrantOf(item.id) +
+        " (value " + p.cv.toFixed(2) + ", complexity " + p.cx.toFixed(2) + ")");
+    }
+    for (const w of WAVES) {
+      lines.push("");
+      lines.push("## " + WAVE_LABEL[w]);
+      if (!state.waves[w].length) { lines.push("_(empty)_"); continue; }
+      for (const id of state.waves[w]) {
+        const item = INITIATIVES.find(i => i.id === id);
+        lines.push("- **#" + id + "** " + item.title + " · cost " + item.cost + " · " + quadrantOf(id));
+        const note = (state.notes[id] || "").trim();
+        if (note) lines.push("  - note: " + note);
+        for (const x of warningsFor(item)) lines.push("  - ⚠ " + x.text);
+      }
+    }
+    lines.push("");
+    lines.push("## Rationale");
+    lines.push(state.rationale.trim() || "_(none recorded)_");
+    return lines.join("\n");
+  }
+
+  const pre = document.getElementById("export-pre");
+  const statusEl = document.getElementById("status");
+  function setStatus(msg) { statusEl.textContent = msg; }
+
+  document.getElementById("btn-preview").addEventListener("click", () => {
+    pre.textContent = buildMarkdown();
+    pre.hidden = false;
+    setStatus("Export generated. Copy it and paste into the Claude Code session.");
+  });
+
+  document.getElementById("btn-copy").addEventListener("click", async () => {
+    const md = buildMarkdown();
+    pre.textContent = md;
+    pre.hidden = false;
+    try {
+      await navigator.clipboard.writeText(md);
+      setStatus("Copied to clipboard.");
+    } catch {
+      setStatus("Clipboard unavailable — select the text below and copy manually.");
+    }
+  });
+
+  const dlBtn = document.getElementById("btn-download");
+  if (window.claude && window.claude.downloads) {
+    dlBtn.hidden = false;
+    dlBtn.addEventListener("click", async () => {
+      const md = buildMarkdown();
+      pre.textContent = md;
+      pre.hidden = false;
+      try {
+        await window.claude.downloads.save({ filename: "wfm-prioritization.md", data: md });
+        setStatus("Saved.");
+      } catch (err) {
+        const code = err && err.code;
+        if (code === "declined") setStatus("Save declined.");
+        else if (code === "rate_limited") setStatus("A save prompt is already open — try again in a moment.");
+        else setStatus("Download unavailable here — use Copy markdown instead.");
+      }
+    });
+  }
+
+  /* ---------- Step 0: backlog table ---------- */
+  const SIZE_LABEL = { S: "S · small", M: "M · medium", L: "L · large" };
+  function buildTable() {
+    const tbody = document.getElementById("issue-tbody");
+    const rows = INITIATIVES.slice().sort((a, b) => a.id - b.id);
+    tbody.innerHTML = rows.map(item =>
+      "<tr>" +
+        '<td class="num"><a href="' + GH + item.id + '" target="_blank" rel="noopener">#' + item.id + "</a></td>" +
+        '<td class="ttl">' + item.title + "</td>" +
+        '<td><span class="chip kind-' + item.kind + '">' + KIND_LABEL[item.kind] + "</span></td>" +
+        '<td class="dsc">' + item.desc + "</td>" +
+        '<td class="sz">' + SIZE_LABEL[item.cost] + "</td>" +
+      "</tr>"
+    ).join("");
+  }
+
+  buildTable();
+  buildMatrix();
+  render();
+</script>

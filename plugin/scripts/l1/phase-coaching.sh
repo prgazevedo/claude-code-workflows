@@ -1,0 +1,68 @@
+#!/bin/bash
+# Copyright (C) 2026 azevedo-home-lab
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# This file is part of Claude Code Workflows.
+# See LICENSE for details.
+
+# L1 Phase coaching loader — builds the coaching message for a phase transition.
+# Called by l1/post-tool-delivery.sh via PostToolUse hook.
+
+[ -n "${_WFM_PHASE_COACHING_LOADED:-}" ] && return 0
+_WFM_PHASE_COACHING_LOADED=1
+
+# Emit the L1 coaching message for a phase transition.
+# Outputs: objective + phase instructions + auto-transition guidance (if auto).
+# Args: $1 = phase name, $2 = autonomy level
+# Uses: PROJECT_ROOT (set to PLUGIN_ASSETS_ROOT by caller)
+_emit_phase_coaching() {
+    local phase="$1"
+    local autonomy="${2:-ask}"
+
+    # "off" phase has no coaching
+    [ "$phase" = "off" ] && return 0
+
+    local plugin_root="${PROJECT_ROOT:-$PLUGIN_ASSETS_ROOT}"
+    local coaching_dir="$plugin_root/coaching"
+    local phases_dir="$plugin_root/phases"
+    local phase_upper
+    phase_upper=$(echo "$phase" | tr '[:lower:]' '[:upper:]')
+
+    # Coaching directory must exist
+    [ -d "$coaching_dir" ] || return 0
+
+    local msg=""
+
+    # Objective
+    local obj_file="$coaching_dir/objectives/$phase.md"
+    if [ -f "$obj_file" ]; then
+        msg="[Workflow Coach — $phase_upper]
+$(cat "$obj_file")"
+    fi
+
+    # Phase instructions
+    local phase_file="$phases_dir/$phase/phase.md"
+    if [ -f "$phase_file" ]; then
+        if [ -n "$msg" ]; then
+            msg="$msg
+
+$(cat "$phase_file")"
+        else
+            msg="$(cat "$phase_file")"
+        fi
+    fi
+
+    # Auto-transition guidance
+    if [ "$autonomy" = "auto" ] && [ -n "$msg" ]; then
+        local auto_file="$coaching_dir/auto-transition/$phase.md"
+        [ -f "$auto_file" ] || auto_file="$coaching_dir/auto-transition/default.md"
+        if [ -f "$auto_file" ]; then
+            msg="$msg
+$(cat "$auto_file")"
+        fi
+    fi
+
+    if [ -n "$msg" ]; then
+        echo "$msg"
+    fi
+}

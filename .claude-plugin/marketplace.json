@@ -1,0 +1,19 @@
+{
+  "name": "prgazevedo",
+  "owner": {
+    "name": "prgazevedo"
+  },
+  "metadata": {
+    "description": "Claude Code Workflow Manager",
+    "homepage": "https://github.com/prgazevedo/claude-code-workflows"
+  },
+  "plugins": [
+    {
+      "name": "workflow-manager",
+      "version": "2.10.0",
+      "source": "./plugin",
+      "description": "Structured workflow enforcement for Claude Code with phase gates, coaching, and autonomy levels",
+      "license": "GPL-3.0-only"
+    }
+  ]
+}

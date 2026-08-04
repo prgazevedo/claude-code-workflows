@@ -1,0 +1,175 @@
+name: Language judge
+
+# Verdicts are mechanical (issue #127): only tools/judge/judge_checks.py can
+# produce FAIL. The model half posts recommendations and has no verdict power.
+# Rolling this workflow out to another repo means copying that script too.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  judge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect text to grade
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          printf '%s\n' "$PR_BODY" | head -c 16000 > /tmp/pr-body.txt
+          # Fixture directories hold deliberately bad prose (calibration
+          # drafts, eval RED captures) — never grade them as PR prose.
+          # Agent prompts are functional prompt text with their own
+          # quality system (evals/ + the Iron Law), not doc prose; the
+          # plain-language scope line does not cover them.
+          git diff "origin/$BASE_REF"...HEAD -- '*.md' \
+            ':(exclude)tools/judge/calibration/*' ':(exclude)evals/*' \
+            ':(exclude)plugin/agents/*' \
+            | grep '^+' | grep -v '^+++' | cut -c2- \
+            | head -c 10000 > /tmp/added-md.txt
+          wc -c /tmp/pr-body.txt /tmp/added-md.txt
+
+      - name: Mechanical verdict
+        id: mechanical
+        run: |
+          if [ ! -f tools/judge/judge_checks.py ]; then
+            echo "tools/judge/judge_checks.py is missing — copy it alongside this workflow" >&2
+            exit 1
+          fi
+          set +e
+          {
+            echo "PR body:"
+            python3 tools/judge/judge_checks.py --pr-body /tmp/pr-body.txt
+            body_rc=$?
+            echo
+            echo "Added Markdown prose:"
+            python3 tools/judge/judge_checks.py --prose /tmp/added-md.txt
+            md_rc=$?
+          } > /tmp/mechanical.txt
+          set -e
+          cat /tmp/mechanical.txt
+          if [ "$body_rc" -eq 0 ] && [ "$md_rc" -eq 0 ]; then
+            echo "verdict=PASS" >> "$GITHUB_OUTPUT"
+          else
+            echo "verdict=FAIL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch previous verdict (round memory)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- language-judge -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.data.find(c => c.body && c.body.startsWith(marker));
+            fs.writeFileSync('/tmp/previous-round.txt', existing ? existing.body : '(no previous round)');
+
+      - name: Load pinned rubric
+        run: |
+          # Single source shared with the local pre-check; calibrated by
+          # tools/judge/calibrate.py (issue #129).
+          if [ ! -f tools/judge/model-checks-prompt.txt ]; then
+            echo "tools/judge/model-checks-prompt.txt is missing — copy it alongside this workflow" >&2
+            exit 1
+          fi
+          cp tools/judge/model-checks-prompt.txt /tmp/judge-system.txt
+
+      - name: Recommend
+        id: grade
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY secret is not set" >&2
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          user = "\n".join([
+              "=== PR BODY ===",
+              open("/tmp/pr-body.txt").read(),
+              "=== ADDED MARKDOWN LINES ===",
+              open("/tmp/added-md.txt").read(),
+              "=== PREVIOUS ROUND ===",
+              open("/tmp/previous-round.txt").read(),
+          ])[:24000]
+          body = {
+              "model": "claude-haiku-4-5",
+              "max_tokens": 1024,
+              "temperature": 0,
+              "system": open("/tmp/judge-system.txt").read(),
+              "messages": [{"role": "user", "content": user}],
+          }
+          open("/tmp/req.json", "w").write(json.dumps(body))
+          PY
+          curl -sf https://api.anthropic.com/v1/messages \
+            -H "content-type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @/tmp/req.json > /tmp/resp.json
+          python3 - <<'PY'
+          import json, sys
+          r = json.load(open("/tmp/resp.json"))
+          text = "".join(
+              b.get("text", "") for b in r.get("content", []) if b.get("type") == "text"
+          )
+          if not text:
+              sys.exit("model returned no text (stop_reason: %s)" % r.get("stop_reason"))
+          open("/tmp/recommendations.txt", "w").write(text)
+          usage = r.get("usage", {})
+          print("tokens in/out:", usage.get("input_tokens"), usage.get("output_tokens"))
+          PY
+
+      - name: Comment verdict
+        uses: actions/github-script@v7
+        env:
+          GRADE_OUTCOME: ${{ steps.grade.outcome }}
+          MECHANICAL_VERDICT: ${{ steps.mechanical.outputs.verdict }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- language-judge -->';
+            const verdict = process.env.MECHANICAL_VERDICT || 'FAIL';
+            let mechanical = '';
+            try { mechanical = fs.readFileSync('/tmp/mechanical.txt', 'utf8').trim(); } catch {}
+            let recs = '';
+            if (process.env.GRADE_OUTCOME === 'success') {
+              try { recs = fs.readFileSync('/tmp/recommendations.txt', 'utf8').trim(); } catch {}
+            }
+            if (!recs) {
+              recs = '_Model unavailable — mechanical verdict stands. Check the `ANTHROPIC_API_KEY` repository secret._';
+            }
+            const body = [
+              marker,
+              `**Language judge — VERDICT: ${verdict}** (computed by \`tools/judge/judge_checks.py\`; advisory — the human is the final arbiter; rubric: \`conventions/plain-language.md\`)`,
+              '',
+              '```',
+              mechanical,
+              '```',
+              '',
+              '**Recommendations** (model: claude-haiku-4-5, temperature 0 — no verdict power):',
+              '',
+              recs,
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.data.find(c => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

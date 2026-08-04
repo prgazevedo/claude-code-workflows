@@ -1,0 +1,55 @@
+name: Agent prompt evals
+
+# When a PR edits a covered agent prompt, re-run that agent's GREEN
+# fixtures (issue #83). This job is a REQUIRED status check (#150), so
+# it runs on every PR and reports instant success when no agent prompt
+# changed — a path filter here would leave non-agent PRs pending
+# forever. Model spend still only happens on agent-prompt PRs. The
+# user (repo admin) can override a FAIL; enforce_admins stays off.
+
+on:
+  pull_request:
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run GREEN fixtures for changed covered agents
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Cheap exit first: most PRs touch no agent prompt, and this
+          # required check must report success without an API key.
+          changed=$(git diff "origin/$BASE_REF"...HEAD --name-only -- 'plugin/agents/*.md')
+          if [ -z "$changed" ]; then
+            echo "No agent prompt changes."
+            exit 0
+          fi
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY secret is not set" >&2
+            exit 1
+          fi
+          rc=0
+          ran=0
+          for f in $changed; do
+            agent=$(basename "$f" .md)
+            if [ ! -d "evals/$agent" ]; then
+              echo "::notice::$agent has no fixtures — not covered."
+              continue
+            fi
+            for fixture in evals/"$agent"/*.md; do
+              echo "=== $fixture ==="
+              ran=1
+              if ! python3 evals/run_fixture.py "$fixture"; then
+                echo "::error::GREEN fixture failed: $fixture"
+                rc=1
+              fi
+            done
+          done
+          [ "$ran" -eq 0 ] && echo "No covered agents touched."
+          exit $rc

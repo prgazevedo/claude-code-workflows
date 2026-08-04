@@ -1,0 +1,65 @@
+{
+  "comment": "Each bad draft violates exactly one check. expect_mechanical is the script verdict; expect_flags names the model checks that must FLAG (empty = all three OK, null = model half not asserted \u2014 the draft calibrates the mechanical half only).",
+  "drafts": [
+    {
+      "file": "clean-1.md",
+      "mode": "pr-body",
+      "expect_mechanical": "PASS",
+      "expect_flags": []
+    },
+    {
+      "file": "clean-2.md",
+      "mode": "pr-body",
+      "expect_mechanical": "PASS",
+      "expect_flags": []
+    },
+    {
+      "file": "bad-mech-long-sentence.md",
+      "mode": "pr-body",
+      "expect_mechanical": "FAIL",
+      "expect_flags": null
+    },
+    {
+      "file": "bad-mech-missing-slot.md",
+      "mode": "pr-body",
+      "expect_mechanical": "FAIL",
+      "expect_flags": null
+    },
+    {
+      "file": "bad-mech-over-budget.md",
+      "mode": "pr-body",
+      "expect_mechanical": "FAIL",
+      "expect_flags": null
+    },
+    {
+      "file": "bad-mech-empty-slot.md",
+      "mode": "pr-body",
+      "expect_mechanical": "FAIL",
+      "expect_flags": null
+    },
+    {
+      "file": "bad-model-opening.md",
+      "mode": "pr-body",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "OPENING"
+      ]
+    },
+    {
+      "file": "bad-model-invented-term.md",
+      "mode": "pr-body",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "TERMS"
+      ]
+    },
+    {
+      "file": "bad-model-adjective.md",
+      "mode": "pr-body",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "ADJECTIVES"
+      ]
+    }
+  ]
+}

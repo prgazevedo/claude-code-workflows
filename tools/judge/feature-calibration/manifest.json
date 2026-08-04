@@ -1,0 +1,79 @@
+{
+  "comment": "Feature judge calibration (#128). Each bad draft violates exactly one check. Mode is prose (no PR slots); expect_flags names the checks that must FLAG. Bad drafts use subset matching: the target check must flag every run; correlated co-flags are allowed. Clean drafts stay exact \u2014 no false positives.",
+  "checks": [
+    "CLEAR",
+    "CONCISE",
+    "FOCUSED",
+    "ACTIONABLE",
+    "SAFE-SECRETS",
+    "SAFE-IMPACT"
+  ],
+  "drafts": [
+    {
+      "file": "clean-1.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": []
+    },
+    {
+      "file": "clean-2.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": []
+    },
+    {
+      "file": "bad-clear.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "CLEAR"
+      ],
+      "match": "subset"
+    },
+    {
+      "file": "bad-concise.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "CONCISE"
+      ],
+      "match": "subset"
+    },
+    {
+      "file": "bad-focused.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "FOCUSED"
+      ],
+      "match": "subset"
+    },
+    {
+      "file": "bad-actionable.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "ACTIONABLE"
+      ],
+      "match": "subset"
+    },
+    {
+      "file": "bad-secrets.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "SAFE-SECRETS"
+      ],
+      "match": "subset"
+    },
+    {
+      "file": "bad-impact.md",
+      "mode": "prose",
+      "expect_mechanical": "PASS",
+      "expect_flags": [
+        "SAFE-IMPACT"
+      ],
+      "match": "subset"
+    }
+  ]
+}

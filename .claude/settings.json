@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent",
+      "Bash",
+      "Glob",
+      "Grep",
+      "Read",
+      "WebFetch",
+      "WebSearch",
+      "mcp__plugin_claude-mem_mcp-search__get_observations",
+      "mcp__plugin_claude-mem_mcp-search__save_observation",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "mcp__plugin_claude-mem_mcp-search__timeline"
+    ]
+  },
+  "enabledPlugins": {}
+}

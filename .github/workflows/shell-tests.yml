@@ -1,0 +1,29 @@
+name: Shell tests
+
+# The mechanical layer (guards, gates, state machine) is the product's
+# differentiator; this suite is its regression net (issue #54).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          git clone --depth 1 -b v1.11.0 https://github.com/bats-core/bats-core.git /tmp/bats-core
+          sudo /tmp/bats-core/install.sh /usr/local
+
+      - name: Run shell test suite
+        run: bats tests/
+
+      - name: Run judge unit tests
+        run: python3 tools/judge/test_judge_checks.py
+
+      - name: shellcheck (error severity)
+        run: shellcheck -S error plugin/scripts/*.sh plugin/scripts/infrastructure/*.sh tools/judge/precheck.sh
