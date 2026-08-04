@@ -187,3 +187,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 [GPL v3](LICENSE)
+
+---
+
+Maintained by [Pedro Azevedo](https://www.linkedin.com/in/pedro-azevedo-577bb1).
