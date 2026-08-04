@@ -7,6 +7,10 @@ sessions: think before coding, review before shipping. Enforcement is
 mechanical — permission hooks block the tool calls, so the workflow holds even
 when prompt instructions would not.
 
+> **Provenance:** developed in a private repository since November 2025 and
+> published here as a snapshot in August 2026. The commit history starts at
+> publication; the project predates it.
+
 ## Why
 
 Model capability improves with every release, and prompt instructions written
